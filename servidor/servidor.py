@@ -1,6 +1,12 @@
 import zmq
 import os
 
+import hashlib
+
+# BUF_SIZE is totally arbitrary, change for your app!
+BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
+
+
 context = zmq.Context()
 
 s = context.socket(zmq.REP)
@@ -27,4 +33,33 @@ elif operacion == 'download':
 elif operacion =='list':
     s.recv_string()
     s.send_string("\n".join(os.listdir('.')))
+elif operacion == 'sharelink':
+    archivo= s.recv_string()
+    md5 = hashlib.md5()
+    with open (archivo, 'rb') as f:
+        while True:
+            data = f.read(BUF_SIZE)
+            if not data:
+                break
+            md5.update(data)
+        link = md5.hexdigest()
+        s.send_string(link)
+elif operacion == 'downloadlink':
+    link= s.recv_string()
+    archivos = os.listdir('.')
+    for archivo in archivos:
+        md5 = hashlib.md5()
+        with open (archivo, 'rb') as f:
+            while True:
+                data = f.read(BUF_SIZE)
+                if not data:
+                    break
+                md5.update(data)
+        
+        if link == md5.hexdigest():
+            s.send_string(archivo)
+            s.recv_string()
+            with open (archivo, 'rb') as f:
+                byte = f.read()
+                s.send_multipart([byte])
     

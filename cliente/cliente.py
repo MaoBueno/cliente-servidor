@@ -36,4 +36,16 @@ elif operacion == 'list':
     s.send_string('')
     aux = s.recv_string()
     print (aux)
-    
+elif operacion == 'sharelink':
+    archivo = sys.argv[3]
+    s.send_string(archivo)
+    link = s.recv_string()
+    print (link)
+elif operacion == 'downloadlink':
+    link= sys.argv[3]
+    s.send_string(link)
+    nombre = s.recv_string()
+    s.send_string('')
+    with open(nombre, 'wb') as f:
+        byte = s.recv_multipart()
+        f.write(byte[0])
