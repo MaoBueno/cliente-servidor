@@ -11,19 +11,31 @@ s.connect('tcp://localhost:8001')
 user = sys.argv[1]
 operacion = sys.argv[2]
 
-s.send_string(user)
+SIZE = 1048576
+
+''' s.send_string(user)
 s.recv_string()
 s.send_string(operacion)
-s.recv_string()
+s.recv_string() '''
 
 
 if operacion == "upload":
     archivo = sys.argv[3]
-    s.send_string(archivo)
-    s.recv_string()
     with open (archivo, 'rb') as f:
-        byte = f.read()
-        s.send_multipart([byte])
+        Mbyte = f.read(SIZE)
+        while True:
+            if not Mbyte:
+                break
+            s.send_string(user)
+            s.recv_string()
+            s.send_string(operacion)
+            s.recv_string()
+            s.send_string(archivo)
+            s.recv_string()
+            s.send_multipart([Mbyte])
+            s.recv_string()
+            Mbyte = f.read(SIZE)
+            
 elif operacion == 'download':
     archivo = sys.argv[3]
     s.send_string(archivo)
