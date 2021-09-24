@@ -7,6 +7,8 @@ import hashlib
 BUF_SIZE = 65536  # lets read stuff in 64kb chunks!
 SIZE = 1048576
 
+usuarios = {}
+
 
 context = zmq.Context()
 
@@ -27,16 +29,23 @@ while True:
             byte = s.recv_multipart()
             f.write(byte[0])
             s.send_string('')
+            
     elif operacion == 'download':
-        archivo= s.recv_string()
-        s.send_string('')
-        s.recv_string()
-        with open (archivo, 'rb') as f:
-            byte = f.read()
-            s.send_multipart([byte])
+        name = s.recv_string()
+        archivo = open(name, 'rb')
+        if usuarios.get(user) == None:
+            usuarios[user] = 0
+        posicion = usuarios[user]
+        archivo.seek(posicion)
+        byte = archivo.read(SIZE)
+        usuarios[user] = archivo.tell()
+        s.send_multipart([byte])
+        archivo.close()
+            
     elif operacion =='list':
         s.recv_string()
         s.send_string("\n".join(os.listdir('.')))
+        
     elif operacion == 'sharelink':
         archivo= s.recv_string()
         md5 = hashlib.md5()
@@ -48,6 +57,7 @@ while True:
                 md5.update(data)
             link = md5.hexdigest()
             s.send_string(link)
+            
     elif operacion == 'downloadlink':
         link= s.recv_string()
         archivos = os.listdir('.')
