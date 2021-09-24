@@ -1,3 +1,7 @@
+# Arquitectura cliente servidor
+# Mauricio Bueno Osorio
+# Entrega I
+
 import json
 import zmq
 import os
@@ -74,9 +78,8 @@ while True:
             
             if link == md5.hexdigest():
                 s.send_string(archivo)
-                s.recv_string()
-                with open (archivo, 'rb') as f:
-                    byte = f.read()
-                    s.send_multipart([byte])
+                break
+            else:
+                print ("El archivo no existe")
     else:
         print ("No existe operacion")

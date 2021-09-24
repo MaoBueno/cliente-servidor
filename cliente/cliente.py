@@ -1,3 +1,7 @@
+# Arquitectura cliente servidor
+# Mauricio Bueno Osorio
+# Entrega I
+
 import zmq      # Provee la comunocación a través de sockets
 import sys
 import json
@@ -48,7 +52,7 @@ elif argumentos.get('operacion') == 'download':
         
 elif argumentos.get('operacion') == 'list':
     datos = json.dumps(argumentos)
-    s.send_string(datos)
+    s.send_json(datos)
     s.recv_string()
     s.send_string('')
     listar_archivos = s.recv_string()
@@ -56,7 +60,7 @@ elif argumentos.get('operacion') == 'list':
     
 elif argumentos.get('operacion') == 'sharelink':
     datos = json.dumps(argumentos)
-    s.send_string(datos)
+    s.send_json(datos)
     s.recv_string()
     s.send_string('')
     link = s.recv_string()
@@ -64,11 +68,22 @@ elif argumentos.get('operacion') == 'sharelink':
     
 elif argumentos.get('operacion') == 'downloadlink':
     datos = json.dumps(argumentos)
-    s.send_string(datos)
+    s.send_json(datos)
     s.recv_string()
     s.send_string('')
     nombre = s.recv_string()
-    s.send_string('')
-    with open(nombre, 'wb') as f:
-        byte = s.recv_multipart()
-        f.write(byte[0])
+    argumentos['archivo'] = nombre
+    argumentos['operacion'] = 'download'
+    
+    with open (argumentos.get('archivo'), 'ab') as f:
+        while True:
+            datos = json.dumps(argumentos)
+            s.send_json(datos)
+            s.recv_string()
+            s.send_string('')
+            byte = s.recv_multipart()
+            
+            if len(byte[0]) == 0:
+                break
+            
+            f.write(byte[0])
