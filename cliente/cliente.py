@@ -1,5 +1,6 @@
 import zmq      # Provee la comunocación a través de sockets
 import sys
+import json
 
 
 context = zmq.Context()
@@ -8,43 +9,36 @@ context = zmq.Context()
 s= context.socket(zmq.REQ)
 s.connect('tcp://localhost:8001')
 
-user = sys.argv[1]
-operacion = sys.argv[2]
+
+argumentos = {
+    'user':sys.argv[1], 
+    'operacion':sys.argv[2],
+    'archivo': sys.argv[3] if sys.argv[2] != 'list' else 0
+}
 
 SIZE = 10485760
 
-''' s.send_string(user)
-s.recv_string()
-s.send_string(operacion)
-s.recv_string() '''
 
-
-if operacion == "upload":
-    archivo = sys.argv[3]
-    with open (archivo, 'rb') as f:
+if argumentos.get('operacion') == "upload":
+    with open (argumentos.get('archivo'), 'rb') as f:
         Mbyte = f.read(SIZE)
         while True:
             if not Mbyte:
                 break
-            s.send_string(user)
-            s.recv_string()
-            s.send_string(operacion)
-            s.recv_string()
-            s.send_string(archivo)
+            datos = json.dumps(argumentos)
+            s.send_json(datos)
             s.recv_string()
             s.send_multipart([Mbyte])
             s.recv_string()
             Mbyte = f.read(SIZE)
             
-elif operacion == 'download':
-    archivo = sys.argv[3]
-    with open (archivo, 'ab') as f:
+elif argumentos.get('operacion') == 'download':
+    with open (argumentos.get('archivo'), 'ab') as f:
         while True:
-            s.send_string(user)
+            datos = json.dumps(argumentos)
+            s.send_json(datos)
             s.recv_string()
-            s.send_string(operacion)
-            s.recv_string()
-            s.send_string(archivo)
+            s.send_string('')
             byte = s.recv_multipart()
             
             if len(byte[0]) == 0:
@@ -52,24 +46,27 @@ elif operacion == 'download':
             
             f.write(byte[0])
         
-elif operacion == 'list':
-    s.send_string(user)
-    s.recv_string()
-    s.send_string(operacion)
+elif argumentos.get('operacion') == 'list':
+    datos = json.dumps(argumentos)
+    s.send_string(datos)
     s.recv_string()
     s.send_string('')
-    aux = s.recv_string()
-    print (aux)
+    listar_archivos = s.recv_string()
+    print (listar_archivos)
     
-elif operacion == 'sharelink':
-    archivo = sys.argv[3]
-    s.send_string(archivo)
+elif argumentos.get('operacion') == 'sharelink':
+    datos = json.dumps(argumentos)
+    s.send_string(datos)
+    s.recv_string()
+    s.send_string('')
     link = s.recv_string()
     print (link)
     
-elif operacion == 'downloadlink':
-    link= sys.argv[3]
-    s.send_string(link)
+elif argumentos.get('operacion') == 'downloadlink':
+    datos = json.dumps(argumentos)
+    s.send_string(datos)
+    s.recv_string()
+    s.send_string('')
     nombre = s.recv_string()
     s.send_string('')
     with open(nombre, 'wb') as f:
