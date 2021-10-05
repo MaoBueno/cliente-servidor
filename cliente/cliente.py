@@ -22,8 +22,7 @@ argumentos = {
 
 SIZE = 10485760
 
-
-if argumentos.get('operacion') == "upload":
+def upload():
     with open (argumentos.get('archivo'), 'rb') as f:
         Mbyte = f.read(SIZE)
         while True:
@@ -35,38 +34,38 @@ if argumentos.get('operacion') == "upload":
             s.send_multipart([Mbyte])
             s.recv_string()
             Mbyte = f.read(SIZE)
-            
-elif argumentos.get('operacion') == 'download':
+
+def download():
     with open (argumentos.get('archivo'), 'ab') as f:
-        while True:
-            datos = json.dumps(argumentos)
-            s.send_json(datos)
-            s.recv_string()
-            s.send_string('')
-            byte = s.recv_multipart()
-            
-            if len(byte[0]) == 0:
-                break
-            
-            f.write(byte[0])
-        
-elif argumentos.get('operacion') == 'list':
+            while True:
+                datos = json.dumps(argumentos)
+                s.send_json(datos)
+                s.recv_string()
+                s.send_string('')
+                byte = s.recv_multipart()
+                
+                if len(byte[0]) == 0:
+                    break
+                
+                f.write(byte[0])
+
+def list():
     datos = json.dumps(argumentos)
     s.send_json(datos)
     s.recv_string()
     s.send_string('')
     listar_archivos = s.recv_string()
-    print (listar_archivos)
-    
-elif argumentos.get('operacion') == 'sharelink':
+    return listar_archivos
+
+def sharelink():
     datos = json.dumps(argumentos)
     s.send_json(datos)
     s.recv_string()
     s.send_string('')
     link = s.recv_string()
-    print (link)
-    
-elif argumentos.get('operacion') == 'downloadlink':
+    return link
+
+def downloadlink():
     datos = json.dumps(argumentos)
     s.send_json(datos)
     s.recv_string()
@@ -87,3 +86,25 @@ elif argumentos.get('operacion') == 'downloadlink':
                 break
             
             f.write(byte[0])
+
+if __name__ == "__main__":
+    
+    if argumentos.get('operacion') == "upload":
+        upload()
+                
+    elif argumentos.get('operacion') == 'download':
+        download()
+            
+    elif argumentos.get('operacion') == 'list':
+        listar_archivos = list()
+        print (listar_archivos)
+        
+    elif argumentos.get('operacion') == 'sharelink':
+        link = sharelink()
+        print (link)
+        
+    elif argumentos.get('operacion') == 'downloadlink':
+        downloadlink()
+    
+    else:
+        print ("No existe operacion")
