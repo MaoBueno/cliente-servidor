@@ -1,6 +1,6 @@
 # Arquitectura cliente servidor
 # Mauricio Bueno Osorio
-# Entrega I
+# Entrega II
 
 import zmq      # Provee la comunocación a través de sockets
 import sys
@@ -138,8 +138,6 @@ if __name__ == "__main__":
         ub = shaServidores[n+1]
         ranges.append( Range( lb,ub ) )
     ranges.append(Range(shaServidores[4],shaServidores[0]))
-    
-    
     
     
     if argumentos.get('operacion') == "upload":

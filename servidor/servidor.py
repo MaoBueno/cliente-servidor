@@ -1,6 +1,6 @@
 # Arquitectura cliente servidor
 # Mauricio Bueno Osorio
-# Entrega I
+# Entrega II
 
 import json
 import zmq
@@ -17,7 +17,6 @@ def megaToSha(megabyte):
     name = hash_object.hexdigest()
     nameAsNum = int(name, 16)
     return nameAsNum
-
 
 
 def upload(socket, directorio):
