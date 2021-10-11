@@ -31,19 +31,16 @@ def upload(socket, directorio):
     with open(nombre, 'ab') as f:
         f.write(Mbyte[0])
 
-# def download():
-#     user = argumentos.get('user')
-#     name = argumentos.get('archivo')
-#     archivo = open(name, 'rb')
-#     s.recv_string()
-#     if usuarios.get(user) == None:
-#         usuarios[user] = 0
-#     posicion = usuarios[user]
-#     archivo.seek(posicion)
-#     byte = archivo.read(SIZE)
-#     usuarios[user] = archivo.tell()
-#     s.send_multipart([byte])
-#     archivo.close()
+def download(argumentos, directorio, socket):
+    hashMb = argumentos.get('archivo')
+    print(argumentos)
+    print(hashMb)
+    
+    nombre = directorio+str(hashMb)
+    
+    with open (nombre, 'rb') as f:
+        Mbyte = f.read()
+        socket.send_multipart([Mbyte])
 
 
 
@@ -70,5 +67,5 @@ if __name__ == "__main__":
             socket.send_string('ok')
             upload(socket, directorio)
                 
-        # elif argumentos.get('operacion') == 'download':
-        #     download()
+        elif argumentos.get('operacion') == 'download':
+            download(argumentos, directorio, socket)

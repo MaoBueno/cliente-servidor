@@ -75,19 +75,32 @@ def upload(argumentos, ranges, servidores):
                         Mbyte = f.read(SIZE)
                         break
 
-# def download():
-#     with open (argumentos.get('archivo'), 'ab') as f:
-#             while True:
-#                 datos = json.dumps(argumentos)
-#                 s.send_json(datos)
-#                 s.recv_string()
-#                 s.send_string('')
-#                 byte = s.recv_multipart()
-                
-#                 if len(byte[0]) == 0:
-#                     break
-                
-#                 f.write(byte[0])
+def download(argumentos, ranges, servidores):
+    with open (argumentos.get('archivo'), 'r') as index:
+        nombre = index.readline()
+        nombre2 = nombre.split('\n')[0]
+        
+        with open ('download-'+nombre2, 'ab') as f:
+                while True:
+                    hashMb = index.readline()
+                    print(hashMb)
+                    
+                    if (len(hashMb)== 0):
+                        break
+                    
+                    hashMb = int(hashMb)
+                    for range in ranges:
+                        if range.member(hashMb):
+                            socket = servidores.get(range.lb)
+                            argumentos['archivo'] = hashMb
+                            
+                            datos = json.dumps(argumentos)
+                            socket.send_string(datos)
+                            
+                            byte = socket.recv_multipart()
+                            
+                            f.write(byte[0])
+                            break
 
 
 
@@ -132,8 +145,8 @@ if __name__ == "__main__":
     if argumentos.get('operacion') == "upload":
         upload(argumentos, ranges, socketServidores)
                 
-    # elif argumentos.get('operacion') == 'download':
-    #     download()
+    elif argumentos.get('operacion') == 'download':
+        download(argumentos, ranges, socketServidores)
     
     else:
         print ("No existe operacion")
